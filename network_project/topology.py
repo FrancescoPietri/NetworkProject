@@ -66,6 +66,7 @@ if __name__ == "__main__":
     net.addController(controller)
     net.build()
     net.start()
+    
     CLI(net)
     net.stop()
 
