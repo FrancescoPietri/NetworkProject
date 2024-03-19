@@ -5,6 +5,7 @@ from mininet.net import Mininet
 from mininet.node import OVSKernelSwitch, RemoteController
 from mininet.cli import CLI
 from mininet.link import TCLink
+import subprocess
 
 class ShipTopo( Topo ):
     "Shiptopo"
@@ -66,7 +67,7 @@ if __name__ == "__main__":
     net.addController(controller)
     net.build()
     net.start()
-    
+    subprocess.call("./deny_ping.sh")    
     CLI(net)
     net.stop()
 
