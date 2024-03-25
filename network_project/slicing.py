@@ -38,7 +38,7 @@ class TrafficSlicing(app_manager.RyuApp):
         #self.threadd.start()
 
         # Source Mapping
-        '''
+        
         self.port_to_port = {
             1: {4:1, 4:2, 4:3},
             2: {4:1, 4:2, 4:3, 5:1, 5:2, 5:3},
@@ -47,7 +47,7 @@ class TrafficSlicing(app_manager.RyuApp):
             5: {4:1, 4:2, 4:3},
             6: {3:1, 3:2},
         }
-        '''
+        
         #self.gui_process = None
         
 
