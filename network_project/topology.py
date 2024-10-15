@@ -19,8 +19,8 @@ class ShipTopo( Topo ):
 
         # Create switch nodes
         for i in range(6):
-            sconfig = {"dpid": "%016x" % (i + 1)}
-            self.addSwitch("s%d" % (i + 1))
+            SWdpid = "%016x" % (i + 1)
+            self.addSwitch("s%d" % (i + 1), dpid = SWdpid)
 
         # Create host nodes
         for i in range(8):
