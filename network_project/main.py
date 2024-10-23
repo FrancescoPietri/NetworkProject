@@ -1,16 +1,14 @@
 from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.node import OVSKernelSwitch, RemoteController
-from mininet.cli import CLI
 from mininet.link import TCLink
-import networkx as nx
 from topology import ShipTopo
-import subprocess
-from CustomCLI import *
+from deployer import WebServiceDeployer  # Importa la classe WebServiceDeployer
+from CustomCLI import MyCLI  # Importa la tua CLI personalizzata
 
-if __name__ == "__main__":
+def main():
+    # Crea la topologia e avvia Mininet
     topo = ShipTopo()
-
     net = Mininet(
         topo=topo,
         switch=OVSKernelSwitch,
@@ -25,7 +23,14 @@ if __name__ == "__main__":
     net.build()
     net.start()
 
-    # subprocess.call("./deny_ping.sh")    
+    # Initialize the WebServiceDeployer
+    deployer = WebServiceDeployer()
+    print(f"DEBUG: Initialized WebServiceDeployer: {deployer}")
 
-    MyCLI(net)  
-    net.stop()  
+    # Lancia la CLI personalizzata
+    MyCLI(net, deployer)  # Pass both net and deployer
+
+    net.stop()
+
+if __name__ == "__main__":
+    main()
