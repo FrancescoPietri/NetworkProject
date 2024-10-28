@@ -28,8 +28,8 @@ def main():
     print(f"DEBUG: Initialized WebServiceDeployer: {deployer}")
 
     # Lancia la CLI personalizzata
-    MyCLI(net, deployer)  # Pass both net and deployer
-
+    cli = MyCLI(net, deployer)  # Pass both net and deployer
+    
     net.stop()
 
 if __name__ == "__main__":
