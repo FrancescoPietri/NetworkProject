@@ -13,13 +13,14 @@ class WebServiceDeployer:
             # Percorso dove salvare il servizio sull'host remoto
             remote_path = f"/home/mininet/{service_name}"
 
+            '''
             # Trasferisci il file del servizio all'host tramite SCP
             print(f"Trasferimento del file {service_name} a {host_name}")
             host.cmd(f'scp {service_path} {host_name}:{remote_path}')
-
+            '''
             # Avvia il servizio web usando SSH
             print(f"Avvio del servizio {service_name} su {host_name}")
-            host.cmd(f'python3 {remote_path} &')
+            host.cmd(f'python3 {service_name} &')
 
             # Aggiungi informazioni alla lista dei deployment
             deployment_info = {
