@@ -52,33 +52,37 @@ class FlowController(app_manager.RyuApp):
         for in_flow in self.installed_flows:
             if in_flow not in allowed_flows:  
                 flow_removed.add((in_flow[0], in_flow[1]))
-                self.remove_flow(dpid, in_flow)
+                self.remove_flow(in_flow)
 
         for i in flow_removed:
             self.installed_flows.remove(i)
 
         
-    def remove_flow(self, dpid, flow):
-        print(f'Removing flow {flow[0]} -> {flow[1]}')
-        datapath = self.datapaths[dpid]
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
+    def remove_flow(self, flow):
+        src, dst = flow  # Indirizzi sorgente e destinazione da rimuovere
 
-        match = parser.OFPMatch(
-            dl_type=0x0800,
-            nw_src=flow[0],  
-            nw_dst=flow[1]   
-        )
+        for dpid, datapath in self.datapaths.items():  # Itera su tutti gli switch
+            print(f'Removing flow {src} -> {dst} on switch {dpid}')
+            
+            ofproto = datapath.ofproto
+            parser = datapath.ofproto_parser
 
-        mod = parser.OFPFlowMod(
-            datapath=datapath,
-            command=ofproto.OFPFC_DELETE,
-            priority=1, 
-            match=match,
-            out_port=ofproto_v1_0.OFPP_NONE  
-        )
+            match = parser.OFPMatch(
+                dl_type=0x0800,  # Specifica IPv4
+                nw_src=src,
+                nw_dst=dst
+            )
 
-        datapath.send_msg(mod)
+            mod = parser.OFPFlowMod(
+                datapath=datapath,
+                command=ofproto.OFPFC_DELETE,
+                priority=1,
+                match=match,
+                out_port=ofproto.OFPP_NONE  # Indica che il flusso deve essere rimosso indipendentemente dalla porta di uscita
+            )
+
+            datapath.send_msg(mod)  # Invia il messaggio di eliminazione del flusso
+
 
     def add_flow(self, dpid, match, actions):
         datapath = self.datapaths[dpid]
