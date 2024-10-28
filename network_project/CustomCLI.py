@@ -79,20 +79,29 @@ class MyCLI(CLI):
         self.deployer.list_deployments()
 
     def do_stop(self, line):
-        "Stop a running service on a specified host: Usage: stop <host> <service_name>"
+        """
+        Stop a running service on a specified host or on all hosts if the host is not specified.
+        Usage: stop <service_name> [host]
+        """
         args = line.split()
-        if len(args) != 2:
-            print("Usage: stop <host> <service_name>")
+        if len(args) < 1 or len(args) > 2:
+            print("Usage: stop <service_name> [host]")
             return
 
-        host, service_name = args
-        print(f"DEBUG: Stopping service {service_name} on {host}")
+        service_name = args[0]
+        host = args[1] if len(args) == 2 else None  # Host is optional
+
+        print(f"DEBUG: Stopping service {service_name} on {'host ' + host if host else 'all hosts'}")
+
+        # Chiamata al metodo stop_service; passa None come host per fermare il servizio su tutti gli host
         self.deployer.stop_service(self.mn, service_name, host)
-        print(f"Service {service_name} stopped on {host}")
+        print(f"Service {service_name} stopped on {host or 'all hosts where it is running'}")
+
 
     def do_service_count(self, line):
-        "Mostra il conteggio dei servizi attivi per ogni host: Usage: service_count"
+        "Mostra il conteggio e i nomi dei servizi attivi per ogni host: Usage: service_count"
         service_count = self.deployer.get_service_count()
-        for host, count in service_count.items():
-            print(f"{host}: {count} servizi attivi")
+        for host, data in service_count.items():
+            print(f"{host}: {data['count']} servizi attivi - {data['services']}")
+
 

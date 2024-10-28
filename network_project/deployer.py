@@ -4,23 +4,18 @@ class WebServiceDeployer:
     def __init__(self):
         # Lista dinamica per tenere traccia dei servizi distribuiti
         self.deployments = []
-        self.service_count = {}  # Dizionario per tenere traccia del numero di servizi per host
-        self.semaphore = None
+        # Dizionario per tenere traccia del numero e dei nomi dei servizi per host
+        self.service_count = {}
 
     def deploy_service(self, net, service_name, service_path, host_name=None):
-        if not self.semaphore:
-            self.service_count = {host.name: 0 for host in net.hosts}
-            self.semaphore = 1
+        # Inizializza la struttura del dizionario service_count per ogni host se non è stata già inizializzata
+        if not self.service_count:
+            self.service_count = {host.name: {"count": 0, "services": []} for host in net.hosts}
 
         try:
             # Se l'host non è specificato, seleziona quello con meno servizi attivi
             if not host_name:
-                #if not self.service_count:
-                    # Inizializza la lista di host e imposta 0 per ciascuno se `service_count` è vuoto
-                    #self.service_count = {host.name: 0 for host in net.hosts}
-
-                # Trova l'host con il minor numero di servizi attivi
-                host_name = min(self.service_count, key=self.service_count.get)
+                host_name = min(self.service_count, key=lambda h: self.service_count[h]["count"])
                 print(f"Host non specificato. Selezionato l'host con meno servizi attivi: {host_name}")
 
             # Trova l'host nella rete Mininet
@@ -29,10 +24,11 @@ class WebServiceDeployer:
             print(f"Avvio del servizio {service_name} su {host_name}")
             host.cmd(f'python3 {service_name} &')
 
-            # Aggiorna il conteggio dei servizi per l'host
+            # Aggiorna il conteggio dei servizi e aggiungi il nome del servizio
             if host_name not in self.service_count:
-                self.service_count[host_name] = 0
-            self.service_count[host_name] += 1
+                self.service_count[host_name] = {"count": 0, "services": []}
+            self.service_count[host_name]["count"] += 1
+            self.service_count[host_name]["services"].append(service_name)
 
             deployment_info = {
                 "service_name": service_name,
@@ -52,23 +48,35 @@ class WebServiceDeployer:
             self.deployments.append(deployment_info)
             print(f"Errore durante il deploy del servizio {service_name} su {host_name}: {e}")
 
-    def stop_service(self, net, service_name, host_name):
-        """Ferma un servizio attivo su uno specifico host"""
+    def stop_service(self, net, service_name, host_name=None):
+        """Ferma un servizio attivo su uno specifico host o su tutti gli host se l'host non è specificato."""
         try:
-            host = net.get(host_name)
-            print(f"Arresto del servizio {service_name} su {host_name}")
-            host.cmd(f'pkill -f {service_name}')
-
-            # Decrementa il conteggio dei servizi per l'host
-            if host_name in self.service_count and self.service_count[host_name] > 0:
-                self.service_count[host_name] -= 1
-
-            print(f"Servizio {service_name} fermato con successo su {host_name}")
+            if host_name:
+                # Arresta il servizio solo sull'host specificato
+                self._stop_service_on_host(net, service_name, host_name)
+            else:
+                # Se l'host non è specificato, arresta il servizio su tutti gli host in cui è presente
+                print(f"Arresto del servizio {service_name} su tutti gli host")
+                for host in self.service_count:
+                    self._stop_service_on_host(net, service_name, host)
         except Exception as e:
-            print(f"Errore durante l'arresto del servizio {service_name} su {host_name}: {e}")
+            print(f"Errore durante l'arresto del servizio {service_name}: {e}")
+
+    def _stop_service_on_host(self, net, service_name, host_name):
+        """Arresta il servizio su un host specifico e aggiorna il conteggio."""
+        host = net.get(host_name)
+        print(f"Arresto del servizio {service_name} su {host_name}")
+        host.cmd(f'pkill -f {service_name}')
+
+        # Decrementa il conteggio dei servizi e rimuovi il nome del servizio
+        if host_name in self.service_count and self.service_count[host_name]["count"] > 0:
+            if service_name in self.service_count[host_name]["services"]:
+                self.service_count[host_name]["services"].remove(service_name)
+                self.service_count[host_name]["count"] -= 1
+                print(f"Servizio {service_name} fermato con successo su {host_name}")
 
     def get_service_count(self):
-        """Restituisce il conteggio dei servizi attivi per ogni host"""
+        """Restituisce il conteggio e i nomi dei servizi attivi per ogni host"""
         return self.service_count
 
     def list_deployments(self):
@@ -84,7 +92,6 @@ class WebServiceDeployer:
         # Utilizza curl per fare una richiesta HTTP verso l'host stesso
         response = host.cmd(f'curl -s -o /dev/null -w "%{{http_code}}" http://{host.IP()}:{port}')
         print(f"response: {response}")
-
 
         if response == "200":
             print(f"Il server su {host_name} è attivo e risponde correttamente.")
