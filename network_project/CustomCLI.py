@@ -60,6 +60,7 @@ class MyCLI(CLI):
 
         host = args[0]
         port = int(args[1]) if len(args) == 2 else 80  # Default to port 80 if not provided
+
         if self.deployer.check_service_status(self.mn, host, port):
             print(f"Service on {host}:{port} is active")
         else:
@@ -68,3 +69,15 @@ class MyCLI(CLI):
     def do_list_deployments(self, line):
         "List all deployments"
         self.deployer.list_deployments()
+
+    def do_stop(self, line):
+        "Stop a running service on a specified host: Usage: stop <host> <service_name>"
+        args = line.split()
+        if len(args) != 2:
+            print("Usage: stop <host> <service_name>")
+            return
+
+        host, service_name = args
+        print(f"DEBUG: Stopping service {service_name} on {host}")
+        self.deployer.stop_service(self.mn, service_name, host)
+        print(f"Service {service_name} stopped on {host}")

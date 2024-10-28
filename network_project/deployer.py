@@ -13,13 +13,15 @@ class WebServiceDeployer:
             # Percorso dove salvare il servizio sull'host remoto
             remote_path = f"/home/mininet/{service_name}"
 
+            '''
             # Trasferisci il file del servizio all'host tramite SCP
             print(f"Trasferimento del file {service_name} a {host_name}")
             host.cmd(f'scp {service_path} {host_name}:{remote_path}')
+            '''
 
             # Avvia il servizio web usando SSH
             print(f"Avvio del servizio {service_name} su {host_name}")
-            host.cmd(f'python3 {remote_path} &')
+            host.cmd(f'python3 {service_name} &')
 
             # Aggiungi informazioni alla lista dei deployment
             deployment_info = {
@@ -49,6 +51,8 @@ class WebServiceDeployer:
 
         # Utilizza curl per fare una richiesta HTTP verso l'host stesso
         response = host.cmd(f'curl -s -o /dev/null -w "%{{http_code}}" http://{host.IP()}:{port}')
+        print(f"response: {response}")
+
 
         if response == "200":
             print(f"Il server su {host_name} è attivo e risponde correttamente.")
@@ -57,8 +61,25 @@ class WebServiceDeployer:
             print(f"Il server su {host_name} non è attivo o non ha risposto correttamente. Codice HTTP: {response}")
             return False
 
+
     def list_deployments(self):
         # Stampa tutte le distribuzioni eseguite
         for deployment in self.deployments:
             print(deployment)
+
+    def stop_service(self, net, service_name, host_name):
+        """Stops a running service on the specified host by name."""
+        try:
+            # Find the host in the network
+            host = net.get(host_name)
+
+            # Attempt to kill the process by the name of the service
+            print(f"Stopping the service {service_name} on {host_name}")
+            host.cmd(f'pkill -f {service_name}')
+
+            print(f"Service {service_name} successfully stopped on {host_name}")
+
+        except Exception as e:
+            print(f"Error stopping service {service_name} on {host_name}: {e}")
+
 
