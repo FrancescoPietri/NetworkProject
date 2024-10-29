@@ -3,17 +3,18 @@
 Flask, networkx (pip install) <br>
 
 #### comandi mininet
+ryu-manager FlowController.py (in un altro terminale)<br>
 sudo -E python3 main.py <br>
-mininet> deploy <nome servizio> <path_locale> <host opzionale> -> fa il deploy, se non specifico host seceglie quello con meno <br> servizi <br>
+mininet> deploy 'nome servizio' 'path_locale' 'host opzionale' -> fa il deploy, se non specifico host seceglie quello con meno <br> servizi <br>
 mininet> service_count -> lista servizi sugli host <br>
-mininet> stop <nome servizio> <host opzionale> -> stoppa il servzio nell'host, se non specifico l'host rimuove il servizio da ovunque <br>
-mininet> check_status <host> <porta> -> vede la risposta del servizio nell'host <br>
-mininet> initflow <hostX> <hostY> -> crea un flow tra hostX e hostY <br>
-mininet> run_client <hostX> <hostY> -> scambia messaggi tra hostX e hostY <br>
+mininet> stop 'nome servizio' 'host opzionale' -> stoppa il servzio nell'host, se non specifico l'host rimuove il servizio da ovunque <br>
+mininet> check_status 'host' 'porta' -> vede la risposta del servizio nell'host <br>
+mininet> initflow 'hostX' 'hostY' -> crea un flow tra hostX e hostY <br>
+mininet> run_client 'hostX' 'hostY' -> scambia messaggi tra hostX e hostY <br>
 
 ##### esempio
-sudo -E python3 main.py <br>
-ryu-manager FlowController.py <br> <br>
+ryu-manager FlowController.py <br>
+sudo -E python3 main.py <br> <br>
 
 deploy MyWebApp.py /home/vagrant/comnetsemu/network_project/MyWebApp.py h5 <br>
 service_count <br>
