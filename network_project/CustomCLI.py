@@ -2,6 +2,8 @@ from mininet.cli import CLI
 from mininet.net import Mininet
 from connectivity import FlowManager
 from deployer import WebServiceDeployer
+import socket
+
 
 class MyCLI(CLI):
     def __init__(self, net, deployer, *args, **kwargs):
@@ -32,24 +34,26 @@ class MyCLI(CLI):
         print(f"Flow created between {h1} and {h2}")
 
     def do_deploy(self, line):
-        "Deploy a web service to a specified host: Usage: deploy <host> <service_name> <service_path>"
+        """
+        Deploy a web service to a specified host.
+        Usage: deploy <service_name> <service_path> [host]
+        If no host is specified, the service will be deployed on the host with the fewest active services.
+        """
         args = line.split()
-        if len(args) != 3:
-            print("Usage: deploy <host> <service_name> <service_path>")
+        if len(args) < 2 or len(args) > 3:
+            print("Usage: deploy <service_name> <service_path> [host]")
             return
 
-        host, service_name, service_path = args
+        service_name = args[0]
+        service_path = args[1]
+        host = args[2] if len(args) == 3 else None  # Host is optional
 
-        # Print debug information to check if deployer exists when the method is called
-        print(f"DEBUG: Calling deploy_service with {host}, {service_name}, {service_path}")
+        print(f"DEBUG: Calling deploy_service with service_name={service_name}, service_path={service_path}, host={host}")
 
-        # Make sure deployer exists before calling deploy_service
-        if not hasattr(self, 'deployer'):
-            print("ERROR: deployer is not set in MyCLI")
-            return
-
+        # Chiama il metodo deploy_service; host sarà None se non specificato
         self.deployer.deploy_service(self.mn, service_name, service_path, host)
-        print(f"Service {service_name} deployed on {host}")
+        print(f"Service {service_name} deployed on {host or 'the host with the fewest active services'}")
+
 
     def do_check_status(self, line):
         "Check if the web service is running on a specified host: Usage: check_status <host> [port]"
@@ -60,6 +64,7 @@ class MyCLI(CLI):
 
         host = args[0]
         port = int(args[1]) if len(args) == 2 else 80  # Default to port 80 if not provided
+
         if self.deployer.check_service_status(self.mn, host, port):
             print(f"Service on {host}:{port} is active")
         else:
@@ -68,3 +73,74 @@ class MyCLI(CLI):
     def do_list_deployments(self, line):
         "List all deployments"
         self.deployer.list_deployments()
+
+    def do_stop(self, line):
+        """
+        Stop a running service on a specified host or on all hosts if the host is not specified.
+        Usage: stop <service_name> [host]
+        """
+        args = line.split()
+        if len(args) < 1 or len(args) > 2:
+            print("Usage: stop <service_name> [host]")
+            return
+
+        service_name = args[0]
+        host = args[1] if len(args) == 2 else None  # Host is optional
+
+        print(f"DEBUG: Stopping service {service_name} on {'host ' + host if host else 'all hosts'}")
+
+        # Chiamata al metodo stop_service; passa None come host per fermare il servizio su tutti gli host
+        self.deployer.stop_service(self.mn, service_name, host)
+        print(f"Service {service_name} stopped on {host or 'all hosts where it is running'}")
+
+
+    def do_service_count(self, line):
+        "Mostra il conteggio e i nomi dei servizi attivi per ogni host: Usage: service_count"
+        service_count = self.deployer.get_service_count()
+        for host, data in service_count.items():
+            print(f"{host}: {data['count']} servizi attivi - {data['services']}")
+
+    def do_run_client(self, line):
+        """
+        Run a client to connect to a server on a specified host and port.
+        Usage: run_client <client_host> <server_host> <port>
+        """
+        args = line.split()
+        if len(args) != 3:
+            print("Usage: run_client <client_host> <server_host> <port>")
+            return
+
+        client_host_name, server_host_name, port = args
+        port = int(port)
+
+        try:
+            client_host = self.mn.get(client_host_name)
+            server_host = self.mn.get(server_host_name)
+            server_ip = server_host.IP()
+        except KeyError as e:
+            print(f"Errore: {e}. Assicurarsi che i nomi degli host siano corretti.")
+            return
+
+        print(f"DEBUG: Connecting from {client_host_name} to {server_host_name} ({server_ip}) on port {port}")
+
+        # Definisci uno script Python inline per eseguire il client
+        client_script = f"""
+import socket
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.settimeout(5)
+s.connect(('{server_ip}', {port}))
+for i in range(3):
+    msg = f'Messaggio {{i+1}} dal client'
+    s.send(msg.encode())
+    print('Inviato al server:', msg)
+    response = s.recv(1024)
+    print('Risposta dal server:', response.decode())
+s.close()
+"""
+
+        # Esegui lo script sul client
+        output = client_host.cmd(f'python3 -c "{client_script}"')
+        print("Output del client:")
+        print(output)
+
+
