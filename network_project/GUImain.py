@@ -6,6 +6,8 @@ from mininet.node import OVSKernelSwitch, RemoteController
 from mininet.link import TCLink
 from topology import ShipTopo
 from deployer import WebServiceDeployer  # Importa la classe WebServiceDeployer
+from connectivity import FlowManager
+
 
 class CommandGUI:
     def __init__(self, net, deployer):
