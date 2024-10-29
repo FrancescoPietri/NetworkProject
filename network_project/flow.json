@@ -6,7 +6,7 @@
         "actions": [
             {
                 "type": "OUTPUT",
-                "port": 4
+                "port": 5
             }
         ]
     },
