@@ -21,6 +21,7 @@ class WebServiceDeployer:
             # Trova l'host nella rete Mininet
             host = net.get(host_name)
             remote_path = f"/home/mininet/{service_name}"
+
             print(f"Avvio del servizio {service_name} su {host_name}")
             host.cmd(f'python3 {service_name} &')
 

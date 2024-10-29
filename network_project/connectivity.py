@@ -12,6 +12,23 @@ from CustomCLI import *
 import json
 
 class FlowManager():
+    
+    def delete_flow(self, het, h1, h2):
+
+        flow_write = []
+
+        with open('flow.json', 'r') as json_file:
+            flow_entries = json.load(json_file)
+
+        for flow in flow_entries:
+            if flow["src"]==f"10.0.0.{h1.split('h')[1]}" or flow["src"]==f"10.0.0.{h2.split('h')[1]}":
+                print(f"removed {h1}->{h2}")
+            else:
+                flow_write.append(flow)
+
+        with open('flow.json', 'w') as json_file:
+            json.dump(flow_write, json_file, indent=4)
+
     def create_flow(self, net, h1, h2):
         nxTopo = nx.Graph()
         for switch in net.switches:
@@ -83,6 +100,12 @@ class FlowManager():
                         "actions": [{"type": "OUTPUT", "port": port_return}]
                     }
                     flow_entries.append(flow_entry_return)
+
+        with open('flow.json', 'r') as json_file:
+            old_flow_entries = json.load(json_file)
+
+        for flow in old_flow_entries:
+            flow_entries.append(flow)
 
         # Write flow entries to flow.json
         with open('flow.json', 'w') as json_file:
