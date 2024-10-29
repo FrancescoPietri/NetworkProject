@@ -8,7 +8,6 @@ from mininet.link import TCLink
 import networkx as nx
 from topology import ShipTopo
 import subprocess
-from CustomCLI import *
 import json
 
 class FlowManager():

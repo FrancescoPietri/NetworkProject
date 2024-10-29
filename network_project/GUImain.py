@@ -1,64 +1,82 @@
 import tkinter as tk
-from tkinter import messagebox
 from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.node import OVSKernelSwitch, RemoteController
 from mininet.link import TCLink
 from topology import ShipTopo
-from deployer import WebServiceDeployer  # Importa la classe WebServiceDeployer
-from connectivity import FlowManager
-
+from deployer import WebServiceDeployer  
 
 class CommandGUI:
     def __init__(self, net, deployer):
         self.net = net
         self.deployer = deployer
+        self.deployed_services = []  
         self.window = tk.Tk()
         self.window.title("Command Sender")
+        self.window.geometry("400x400")
+        self.window.configure(bg="#2e2e2e")
 
-        # Crea un'etichetta
-        label = tk.Label(self.window, text="Inserisci un comando:")
-        label.pack(pady=10)
+        title_label = tk.Label(self.window, text="Service Deployment Interface", fg="white", bg="#2e2e2e", font=("Helvetica", 16, "bold"))
+        title_label.pack(pady=15)
 
-        # Crea un campo di input
-        self.command_entry = tk.Entry(self.window, width=50)
-        self.command_entry.pack(pady=5)
+        input_frame = tk.Frame(self.window, bg="#2e2e2e")
+        input_frame.pack(pady=10)
 
-        # Crea un pulsante
-        send_button = tk.Button(self.window, text="Invia", command=self.send_command)
-        send_button.pack(pady=10)
+        label = tk.Label(input_frame, text="Service Name:", fg="white", bg="#2e2e2e", font=("Helvetica", 12))
+        label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
-        # Gestisci chiusura della finestra
+        self.command_entry = tk.Entry(input_frame, width=30, font=("Helvetica", 12))
+        self.command_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        self.selected_service = tk.StringVar(self.window)
+        self.selected_service.set("Select deployed service")
+        
+        menu_frame = tk.Frame(self.window, bg="#2e2e2e")
+        menu_frame.pack(pady=10)
+        self.service_menu = tk.OptionMenu(menu_frame, self.selected_service, "")
+        self.service_menu.config(width=30, font=("Helvetica", 12))
+        self.service_menu.pack(pady=5)
+
+        button_frame = tk.Frame(self.window, bg="#2e2e2e")
+        button_frame.pack(pady=10)
+
+        send_button = tk.Button(button_frame, text="Deploy", command=self.deploy_service, bg="#4CAF50", fg="white", font=("Helvetica", 12, "bold"), width=10)
+        send_button.grid(row=0, column=0, padx=10, pady=10)
+
+        delete_button = tk.Button(button_frame, text="Delete", command=self.delete_service, bg="#F44336", fg="white", font=("Helvetica", 12, "bold"), width=10)
+        delete_button.grid(row=0, column=1, padx=10, pady=10)
+
+        self.log_area = tk.Text(self.window, height=8, width=50, font=("Helvetica", 10), bg="#1e1e1e", fg="white")
+        self.log_area.pack(pady=10)
+
         self.window.protocol("WM_DELETE_WINDOW", self.on_close)
-
-        # Avvia l'interfaccia grafica
         self.window.mainloop()
 
-    def send_command(self):
-        command = self.command_entry.get()
-        if command:
-            try:
-                # Esegui il comando qui (adatta questa parte in base a come vuoi gestire i comandi)
-                result = self.handle_command(command)
-                messagebox.showinfo("Risultato", f"Comando eseguito: {result}")
-            except Exception as e:
-                messagebox.showerror("Errore", f"Errore nell'esecuzione del comando: {e}")
-            self.command_entry.delete(0, tk.END)  # Pulisci il campo di input
-        else:
-            messagebox.showwarning("Errore", "Per favore, inserisci un comando.")
+    def delete_service(self):
+        service_name = self.command_entry.get().strip()
+        if service_name and service_name in self.deployed_services:
+            self.deployed_services.remove(service_name)
+            self.update_service_menu()
+            self.selected_service.set("")
 
-    def handle_command(self, command):
-        # Implementa qui la logica per eseguire il comando
-        print(f"Eseguendo comando: {command}")
-        return f"Comando '{command}' eseguito."
+    def deploy_service(self):
+        service_name = self.command_entry.get().strip()
+        if service_name and service_name not in self.deployed_services:
+            self.deployed_services.append(service_name)
+            self.update_service_menu()
+
+    def update_service_menu(self):
+        menu = self.service_menu["menu"]
+                menu.delete(0, "end")
+        
+        for service in self.deployed_services:
+            menu.add_command(label=service, command=lambda value=service: self.selected_service.set(value))
 
     def on_close(self):
-        # Ferma la rete e chiudi la finestra
         self.net.stop()
         self.window.destroy()
 
 def main():
-    # Crea la topologia e avvia Mininet
     topo = ShipTopo()
     net = Mininet(
         topo=topo,
@@ -70,18 +88,14 @@ def main():
     )
 
     controller = net.addController('controller', controller=RemoteController, ip='127.0.0.1', port=6633)
-
     net.build()
     net.start()
 
-    # Inizializza il WebServiceDeployer
     deployer = WebServiceDeployer()
-    print(f"DEBUG: Initialized WebServiceDeployer: {deployer}")
-
-    # Avvia l'interfaccia grafica per inviare comandi
-    CommandGUI(net, deployer)  # Passa net e deployer alla GUI
+    CommandGUI(net, deployer)  
 
 if __name__ == "__main__":
     main()
+
 
 

@@ -3,10 +3,17 @@ from mininet.net import Mininet
 from connectivity import FlowManager
 from deployer import WebServiceDeployer
 import socket
+import json
 
 
 class MyCLI(CLI):
     def __init__(self, net, deployer, *args, **kwargs):
+
+        reset_flow = []
+
+        with open('flow.json', 'w') as json_file:
+            json.dump(reset_flow, json_file, indent=4)
+
         # Print debug information to check if deployer is passed correctly
         print(f"DEBUG: Initializing MyCLI with deployer: {deployer}")
 
