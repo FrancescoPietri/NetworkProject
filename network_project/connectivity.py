@@ -20,7 +20,7 @@ class FlowManager():
             flow_entries = json.load(json_file)
 
         for flow in flow_entries:
-            if flow["src"]==f"10.0.0.{h1.split('h')[1]}" or flow["src"]==f"10.0.0.{h2.split('h')[1]}":
+            if (flow["src"]==f"10.0.0.{h1.split('h')[1]}" or flow["src"]==f"10.0.0.{h2.split('h')[1]}") and (flow["dst"]==f"10.0.0.{h1.split('h')[1]}" or flow["dst"]==f"10.0.0.{h2.split('h')[1]}"):
                 print(f"removed {h1}->{h2}")
             else:
                 flow_write.append(flow)

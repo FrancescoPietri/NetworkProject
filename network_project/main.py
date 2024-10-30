@@ -3,11 +3,10 @@ from mininet.net import Mininet
 from mininet.node import OVSKernelSwitch, RemoteController
 from mininet.link import TCLink
 from topology import ShipTopo
-from deployer import WebServiceDeployer  # Importa la classe WebServiceDeployer
-from CustomCLI import MyCLI  # Importa la tua CLI personalizzata
+from deployer import WebServiceDeployer 
+from CustomCLI import MyCLI
 
 def main():
-    # Crea la topologia e avvia Mininet
     topo = ShipTopo()
     net = Mininet(
         topo=topo,
@@ -23,13 +22,10 @@ def main():
     net.build()
     net.start()
 
-    # Initialize the WebServiceDeployer
     deployer = WebServiceDeployer()
     print(f"DEBUG: Initialized WebServiceDeployer: {deployer}")
 
-    # Lancia la CLI personalizzata
-    cli = MyCLI(net, deployer)  # Pass both net and deployer
-    
+    cli = MyCLI(net, deployer)  
     net.stop()
 
 if __name__ == "__main__":
