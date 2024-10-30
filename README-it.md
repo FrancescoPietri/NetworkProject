@@ -1,4 +1,4 @@
-Italian version [here](README-it.md)
+English version [here](README.md)
 
 ---
 
