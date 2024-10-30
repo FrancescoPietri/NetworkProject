@@ -74,27 +74,45 @@ sudo python3 GUImain.py
 
 ## Descrizione del workingflow
 
+<p align="center">
+  <img src="images/test.png" width="1000">
+</p>
+
 #### Deploy
 1. Inserire il nome del servizio voluto
 2. premere start - verrànno chiamate a cascata le funzioni
-3. ```python
-def somma(a, b):
-    """Restituisce la somma di due numeri."""
-    return a + b
+3. start client
+    ```python
+    def sottrazione(a, b):
+        """Restituisce la differenza tra due numeri."""
+        return a - b
+    ```
 
 4. deploy client che contiene initflow
+    ```python
+    def sottrazione(a, b):
+        """Restituisce la differenza tra due numeri."""
+        return a - b
+    ```
 
 
 #### Stop
 1. selezionare dal menu a tendina il servizio da fermare
 2. premere stop
 3. verranno chiamate le funzioni
-4. ```python
-def somma(a, b):
-    """Restituisce la somma di due numeri."""
-    return a + b
+4. stop client
+  ```python
+  def somma(a, b):
+      """Restituisce la somma di due numeri."""
+      return a + b
+  ```
 
 5. stop server
+    ```python
+    def sottrazione(a, b):
+        """Restituisce la differenza tra due numeri."""
+        return a - b
+    ```
 
 
 le operazioni verranno mostrate all'utente tramite un comodo schermo
@@ -112,7 +130,7 @@ le operazioni verranno mostrate all'utente tramite un comodo schermo
     </p>
 </details>
 
-[Video demo](https://youtu.be/SWiC3gSeuXk)
+[Video demo](https://www.youtube.com/watch?v=0IURpXwvLrw)
 
 
 <details>
