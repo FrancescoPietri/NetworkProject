@@ -48,8 +48,8 @@ English version [here](README.md)
 Comandi di Inizializzazione
 Per avviare la rete e il controller, basta eseguire le seguenti istruzioni per avviare il controller:
 
-```python
-./ryu manager flowcontroller
+```bash
+ryu-manager FlowController.py
 ```
 
 <details>
@@ -61,8 +61,8 @@ Per avviare la rete e il controller, basta eseguire le seguenti istruzioni per a
 
 e su un altro terminale chiamare il comando per aprire la gui
 
-```python
-./GUI
+```bash
+sudo python3 GUImain.py
 ```
 <details>
 <summary>output</summary>
@@ -72,28 +72,29 @@ e su un altro terminale chiamare il comando per aprire la gui
 </details>
 
 
-
-
-
-
-
-
-
 ## Descrizione del workingflow
-Inserire il nome del servizio voluto
-premere start
-verrànno chiamate a cascata le funzioni
-deploy server
-deploy client ceh contiene initflow
+
+#### Deploy
+1. Inserire il nome del servizio voluto
+2. premere start - verrànno chiamate a cascata le funzioni
+3. ```python
+def somma(a, b):
+    """Restituisce la somma di due numeri."""
+    return a + b
+
+4. deploy client che contiene initflow
 
 
+#### Stop
+1. selezionare dal menu a tendina il servizio da fermare
+2. premere stop
+3. verranno chiamate le funzioni
+4. ```python
+def somma(a, b):
+    """Restituisce la somma di due numeri."""
+    return a + b
 
-per lo stop
-selezionare dal menu a tendina il servizio da fermare
-premere stop
-verranno chiamate le funzioni
-stop client
-stop server
+5. stop server
 
 
 le operazioni verranno mostrate all'utente tramite un comodo schermo
@@ -104,6 +105,12 @@ le operazioni verranno mostrate all'utente tramite un comodo schermo
 ## Testing
 
 è possibile controllare tramita wireshark l'effettoivo scambio di messaggi tra client e server
+<details>
+<summary>output</summary>
+    <p align="center">
+      <img src="images/test.png" width="600">
+    </p>
+</details>
 
 [Video demo](https://youtu.be/SWiC3gSeuXk)
 
