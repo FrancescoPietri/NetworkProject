@@ -1,4 +1,6 @@
 import subprocess
+from connectivity import FlowManager
+import time
 
 class WebServiceDeployer:
     def __init__(self):
@@ -7,7 +9,7 @@ class WebServiceDeployer:
         # Dizionario per tenere traccia del numero e dei nomi dei servizi per host
         self.service_count = {}
 
-    def deploy_service(self, net, service_name, service_path, host_name=None):
+    def deploy_service(self, net, service_name, port, host_server = None, host_name=None):
         # Inizializza la struttura del dizionario service_count per ogni host se non è stata già inizializzata
         if not self.service_count:
             self.service_count = {host.name: {"count": 0, "services": []} for host in net.hosts}
@@ -23,7 +25,21 @@ class WebServiceDeployer:
             remote_path = f"/home/mininet/{service_name}"
 
             print(f"Avvio del servizio {service_name} su {host_name}")
-            host.cmd(f'python3 {service_name} &')
+            if service_name == "server.py":
+                host.cmd(f'python3 {service_name} {port}&')
+            else:
+                fm = FlowManager()
+
+                fm.create_flow(net, host_name, host_server)
+                host.cmd(f"ping -c 1 {net.get(host_server)}")
+                time.sleep(5)
+
+                ip = net.get(host_server)
+                ip = ip.IP()
+                output = host.cmd(f'python3 {service_name} {port} {ip}')
+                print("host output:\n")
+                print(output)
+
 
             # Aggiorna il conteggio dei servizi e aggiungi il nome del servizio
             if host_name not in self.service_count:
@@ -39,6 +55,8 @@ class WebServiceDeployer:
             }
             self.deployments.append(deployment_info)
             print(f"Deployment successo per {service_name} su {host_name}")
+            return host_name 
+
         except Exception as e:
             deployment_info = {
                 "service_name": service_name,
@@ -48,6 +66,7 @@ class WebServiceDeployer:
             }
             self.deployments.append(deployment_info)
             print(f"Errore durante il deploy del servizio {service_name} su {host_name}: {e}")
+            
 
     def stop_service(self, net, service_name, host_name=None):
         """Ferma un servizio attivo su uno specifico host o su tutti gli host se l'host non è specificato."""

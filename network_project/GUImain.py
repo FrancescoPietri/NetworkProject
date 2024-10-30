@@ -5,9 +5,14 @@ from mininet.node import OVSKernelSwitch, RemoteController
 from mininet.link import TCLink
 from topology import ShipTopo
 from deployer import WebServiceDeployer  
+import json
 
 class CommandGUI:
     def __init__(self, net, deployer):
+
+        self.service_manager = {}
+        self.portCout = 8080
+
         self.net = net
         self.deployer = deployer
         self.deployed_services = []  
@@ -59,15 +64,29 @@ class CommandGUI:
             self.update_service_menu()
             self.selected_service.set("")
 
+
     def deploy_service(self):
         service_name = self.command_entry.get().strip()
         if service_name and service_name not in self.deployed_services:
             self.deployed_services.append(service_name)
             self.update_service_menu()
 
+        self.service_manager[f"{service_name}"] = [self.portCout + len(self.service_manager)]
+
+        hostx = self.deployer.deploy_service(self.net, "server.py", self.service_manager[f"{service_name}"][0])
+
+        self.service_manager[f"{service_name}"].append(hostx)
+
+        hosty = self.deployer.deploy_service(self.net, "client.py", self.service_manager[f"{service_name}"][0], hostx)
+
+        self.service_manager[f"{service_name}"].append(hosty)
+
+        for i in self.service_manager:
+            print(i + " " + str(self.service_manager[i]))
+
     def update_service_menu(self):
         menu = self.service_menu["menu"]
-                menu.delete(0, "end")
+        menu.delete(0, "end")
         
         for service in self.deployed_services:
             menu.add_command(label=service, command=lambda value=service: self.selected_service.set(value))
@@ -77,6 +96,12 @@ class CommandGUI:
         self.window.destroy()
 
 def main():
+
+    reset_flow = []
+
+    with open('flow.json', 'w') as json_file:
+        json.dump(reset_flow, json_file, indent=4)
+    
     topo = ShipTopo()
     net = Mininet(
         topo=topo,
