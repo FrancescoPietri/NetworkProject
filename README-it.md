@@ -149,7 +149,7 @@ sudo python3 GUImain.py
             print(f"Error during deployment of {service_name} on {host_name}: {e}")
     ```
 
-4. Deploy del client con la medesima funzione specificando service_name, notare che contiene la funzione create_flow (riportata sotto) la quale crea il canale di comunicazione tra i due host
+4. Deploy del client con la medesima funzione specificando `service_name`, notare che contiene la funzione `create_flow` (riportata sotto) la quale crea il canale di comunicazione tra i due host
     ```python
         def create_flow(self, net, h1, h2):
         nxTopo = nx.Graph()
@@ -254,7 +254,7 @@ sudo python3 GUImain.py
                 print(f"Service at port: {port} stopped successfully on {host_name}")
   ```
 
-5. Stop server, anche in questo caso sono state usate le stesse funzioni, specificando service_name
+5. Stop server, anche in questo caso sono state usate le stesse funzioni, specificando `service_name`
 6. Rimozione del canale di comunicazione
      ```python
        def delete_flow(self, het, h1, h2):
