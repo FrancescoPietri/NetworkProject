@@ -91,29 +91,179 @@ sudo python3 GUImain.py
 3. Deploy a server
     ```python
     def deploy_service(self, net, service_name, port, host_server = None, host_name=None):
-        # Code snippet continues as in the original file
+        if not self.service_count:
+            self.service_count = {host.name: {"count": 0, "services": []} for host in net.hosts}
+    
+        try:
+            if not host_name:
+                host_name = min(self.service_count, key=lambda h: self.service_count[h]["count"])
+                print(f"Deploying on:{host_name}")
+    
+            host = net.get(host_name)
+            remote_path = f"/home/mininet/{service_name}"
+    
+            print(f"Starting {service_name} on {host_name}")
+            if service_name == "server.py":
+                host.cmd(f'python3 {service_name} {port}&')
+            else:
+                fm = FlowManager()
+    
+                fm.create_flow(net, host_name, host_server)
+                host.cmd(f"ping -c 1 {net.get(host_server)}")
+                time.sleep(5)
+    
+                ip = net.get(host_server)
+                ip = ip.IP()
+                host.cmd(f'python3 {service_name} {port} {ip}&')
+    
+            if host_name not in self.service_count:
+                self.service_count[host_name] = {"count": 0, "services": []}
+            self.service_count[host_name]["count"] += 1
+            self.service_count[host_name]["services"].append(port)
+    
+            deployment_info = {
+                "service_name": service_name,
+                "host": host_name,
+                "status": "success",
+                "remote_path": remote_path
+            }
+            self.deployments.append(deployment_info)
+            print(f"Successfully deployed {service_name} on {host_name}")
+            return host_name 
+    
+        except Exception as e:
+            deployment_info = {
+                "service_name": service_name,
+                "host": host_name,
+                "status": "failed",
+                "error": str(e)
+            }
+            self.deployments.append(deployment_info)
+            print(f"Error during deployment of {service_name} on {host_name}: {e}")
     ```
 
 4. Deploy the client using the same function by specifying `service_name`. Note that it includes the `create_flow` function (shown below), which establishes a communication channel between the two hosts.
     ```python
     def create_flow(self, net, h1, h2):
-    # Code snippet continues as in the original file
+        nxTopo = nx.Graph()
+        for switch in net.switches:
+            nxTopo.add_node(switch)
+    
+        for host in net.hosts:
+            nxTopo.add_node(host)
+    
+        for link in net.links:
+            nxTopo.add_edge(link.intf1.node.name, link.intf2.node.name)
+    
+        path = nx.shortest_path(nxTopo, h1, h2)
+    
+        flow_entries = []
+    
+        for step in range(len(path)-1):
+            if step == 0:
+                port_host_send = net.linksBetween(net.get(path[0]), net.get(path[1]))[0].intf1.name
+    
+                if not port_host_send.split('-')[0] == path[1]:
+                    port_host_send = net.linksBetween(net.get(path[step]), net.get(path[step+1]))[0].intf2.name
+    
+                port_host_send = int(port_host_send.split('eth')[1])
+                flow_entry = {
+                    "dpid": "%016x" % (int(net.get(path[1]).name.split('s')[1])),
+                    "src": f"10.0.0.{path[len(path)-1].split('h')[1]}",
+                    "dst": f"10.0.0.{path[0].split('h')[1]}",
+                    "actions": [{"type": "OUTPUT", "port": port_host_send}]
+                }
+                flow_entries.append(flow_entry)
+    
+            else:
+                if step == len(path)-2:
+                    port_host_receiver = net.linksBetween(net.get(path[step]), net.get(path[step+1]))[0].intf1.name
+    
+                    if not port_host_receiver.split('-')[0] == path[step]:
+                        port_host_receiver = net.linksBetween(net.get(path[step]), net.get(path[step+1]))[0].intf2.name
+    
+                    port_host_receiver = int(port_host_receiver.split('eth')[1])
+                    flow_entry = {
+                        "dpid":  "%016x" % (int(net.get(path[step]).name.split('s')[1])),
+                        "src": f"10.0.0.{path[0].split('h')[1]}",
+                        "dst": f"10.0.0.{path[len(path)-1].split('h')[1]}",
+                        "actions": [{"type": "OUTPUT", "port": port_host_receiver}]
+                    }
+                    flow_entries.append(flow_entry)
+                else:
+                    port_send = net.linksBetween(net.get(path[step]), net.get(path[step+1]))[0].intf1.name
+                    port_return = net.linksBetween(net.get(path[step]), net.get(path[step+1]))[0].intf2.name
+                    
+                    if not port_send.split('-')[0] == path[step]:
+                        port_send = net.linksBetween(net.get(path[step]), net.get(path[step+1]))[0].intf2.name
+                        port_return = net.linksBetween(net.get(path[step]), net.get(path[step+1]))[0].intf1.name
+    
+                    port_send = int(port_send.split('eth')[1])
+                    flow_entry_send = {
+                        "dpid":  "%016x" % (int(net.get(path[step]).name.split('s')[1])),
+                        "dst": f"10.0.0.{path[len(path)-1].split('h')[1]}",
+                        "src": f"10.0.0.{path[0].split('h')[1]}",
+                        "actions": [{"type": "OUTPUT", "port": port_send}]
+                    }
+                    flow_entries.append(flow_entry_send)
+    
+                    port_return = int(port_return.split('eth')[1])
+                    flow_entry_return = {
+                        "dpid": "%016x" % (int(net.get(path[step+1]).name.split('s')[1])),
+                        "dst": f"10.0.0.{path[0].split('h')[1]}",
+                        "src": f"10.0.0.{path[len(path)-1].split('h')[1]}",
+                        "actions": [{"type": "OUTPUT", "port": port_return}]
+                    }
+                    flow_entries.append(flow_entry_return)
     ```
 
 #### Stopping a Service
 1. Select the service to stop from the drop-down menu.
 2. Click the Delete button – the following functions will be called sequentially.
-4. Stop client
+3. Stop client
   ```python
-    def stop_service(self, net, service_name, port, host_name=None):
-        # Code snippet continues as in the original file
+  def stop_service(self, net, service_name, port, host_name=None):
+      try:
+          if host_name:
+              self._stop_service_on_host(net, port, host_name)
+          else:
+              print(f"Stopping all services on port: {port}")
+              for host in self.service_count:
+                  self._stop_service_on_host(net, port, host, service_name)
+      except Exception as e:
+          print(f"Error during stopping service on port: {port}: {e}")
+
+  def _stop_service_on_host(self, net, port, host_name, service_name):
+      host = net.get(host_name)
+      print(f"Stopped service on port:{port} on {host_name}")
+      host.cmd(f'fuser -k {port}/tcp')    
+      print(host.cmd(f'ps'))
+
+      if host_name in self.service_count and self.service_count[host_name]["count"] > 0:
+          if port in self.service_count[host_name]["services"]:
+              self.service_count[host_name]["services"].remove(port)
+              self.service_count[host_name]["count"] -= 1
+              print(f"Service at port: {port} stopped successfully on {host_name}")
   ```
 
-5. Stop server using the same functions, specifying `service_name`.
-6. Remove the communication channel.
+4. Stop server using the same functions, specifying `service_name`.
+5. Remove the communication channel.
      ```python
-       def delete_flow(self, het, h1, h2):
-       # Code snippet continues as in the original file
+    def delete_flow(self, het, h1, h2):
+
+       flow_write = []
+    
+       with open('flow.json', 'r') as json_file:
+           flow_entries = json.load(json_file)
+    
+       for flow in flow_entries:
+           if (flow["src"]==f"10.0.0.{h1.split('h')[1]}" or flow["src"]==f"10.0.0.{h2.split('h')[1]}") and (flow["dst"]==f"10.0.0.{h1.split('h')[1]}" or flow["dst"]==f"10.0.0.{h2.split('h')[1]}"):
+               print(f"removed {h1}->{h2}")
+           else:
+               flow_write.append(flow)
+    
+       with open('flow.json', 'w') as json_file:
+           json.dump(flow_write, json_file, indent=4)
       ```
 
 All operations will be displayed to the user through a convenient screen in the graphical interface.
@@ -141,14 +291,12 @@ Example of correct operation
 
 ---
 
-![Deploy](images/test.png)  
+![Deploy](images/Deploy.png)
 *Message confirming service deployment*  
 
-![Delete](images/test.png)  
+![Delete](images/Delete.png)
 *Message confirming service termination*
 
 </details>
 
-
-[Video demo](https://www.youtube.com/watch?v=0IURpXwvLrw)
 

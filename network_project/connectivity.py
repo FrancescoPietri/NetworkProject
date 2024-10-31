@@ -106,9 +106,7 @@ class FlowManager():
         for flow in old_flow_entries:
             flow_entries.append(flow)
 
-        # Write flow entries to flow.json
         with open('flow.json', 'w') as json_file:
             json.dump(flow_entries, json_file, indent=4)
 
-        # Log the created flows for debugging
         print("Flow entries created and saved to flow.json")
