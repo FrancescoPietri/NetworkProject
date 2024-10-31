@@ -269,9 +269,9 @@ sudo python3 GUImain.py
 All operations will be displayed to the user through a convenient screen in the graphical interface.
 
 <details>
-<summary>output</summary>
+<summary>Example</summary>
     <p align="center">
-      <img src="images/test.png" width="600">
+      <img src="images/guiEx.png" width="600">
     </p>
 </details>
 

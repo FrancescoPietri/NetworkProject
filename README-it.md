@@ -278,9 +278,9 @@ sudo python3 GUImain.py
 Tutte le operazioni verranno mostrate all'utente tramite un comodo schermo presente nell'interfaccia grafica
 
 <details>
-<summary>output</summary>
+<summary>Esempio</summary>
     <p align="center">
-      <img src="images/test.png" width="600">
+      <img src="images/guiEx.png" width="600">
     </p>
 </details>
 
