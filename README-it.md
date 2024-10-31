@@ -11,14 +11,14 @@ English version [here](README.md)
 - [Caratteristiche Principali](#caratteristiche-principali)
 - [Benefici](#benefici)
 - [Casi d'Uso](#casi-duso)
-- [Dipendend del Sistema](#dipendenze)
+- [Dipendend del Sistema](#dipendenze-del-sistema)
 - [Iniziare](#iniziare)
 - [Descrizione Workingflow](#descrizione-del-workingflow)
 - [Testing](#testing)
 
 ---
 
-### Caratteristiche Principali
+## Caratteristiche Principali
 
 - **Indipendenza dalla Topologia della rete**:
     - La topologia non è inserita direttamente nel codice
@@ -33,19 +33,19 @@ English version [here](README.md)
     - Deploy totalmente automatizzato
 
 
-### Benefici
+## Benefici
 
 - **Flessibilità**: Al verificarsi si un cambio della rete non è necessario un intervento nell'architettura del sistema, è sufficiente specificare un diverso file in imput contenente la nuova topologia
 - **Autonomia**: Permette all'utente un deploy automatico tramite GUI garantendo allo stesso tempo il mantenimento degli host della rete bilanciati
 
-### Casi d'Uso
+## Casi d'Uso
 
 - **Reti Aziendali**: Garantisce la continuità aziendale date le modifiche minime da apportare in caso di un cambiamento alla rete
 - **Personale con poca esperienza**: Permette di effettuare deploy di servizi da parte di personale senza elevate conoscenze tecniche
 
 
 
-## Dipendenze
+## Dipendenze del sistema
 
 Il sistema lavora su macchina virtuale Comnetsemu<br>
 Utilizza Mininet per la creazione di una rete virtuale<br> <br>
