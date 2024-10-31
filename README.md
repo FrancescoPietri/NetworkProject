@@ -21,7 +21,7 @@ maximizing the use of network resources. Additionally, the system includes an in
 
 ---
 
-### Main Features
+## Main Features
 
 - **Network Topology Independence**:
     - The topology is not embedded in the code.
@@ -34,12 +34,12 @@ maximizing the use of network resources. Additionally, the system includes an in
     - A communication channel between two hosts is automatically created.
     - Fully automated deployment.
 
-### Benefits
+## Benefits
 
 - **Flexibility**: If there is a change in the network, no changes to the system architecture are required—simply specify a new input file with the updated topology.
 - **Autonomy**: Allows users to deploy automatically via the GUI while maintaining balanced network hosts.
 
-### Use Cases
+## Use Cases
 
 - **Corporate Networks**: Ensures business continuity with minimal changes in case of network modifications.
 - **Non-Technical Staff**: Enables service deployment by staff with limited technical knowledge.
