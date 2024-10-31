@@ -2,143 +2,153 @@ Italian version [here](README-it.md)
 
 ---
 
-# Title
 
-> Il porgetto Title è progettato per creare una rete virtuale flessibile a cambi nella rete rendendol il sistema versatile e che permetta il deploy e lo stop automatici dei servizi mantenendo gli host della rete bilanciati migliorando sfruttando al meglio tutte le risorse della rete fornendo inoltre una comoda GUI, scambio di messaggi presente
+# SDN Service Deployer
 
+> The SDN Service Deployer project is designed to create a highly flexible and adaptable virtual network, 
+making the system versatile and capable of automatically managing the deployment, termination of services, 
+and the establishment of a messaging channel between them. The architecture ensures optimal host load balancing, 
+maximizing the use of network resources. Additionally, the system includes an intuitive GUI for simple and immediate management.
 
-## Contenuti
-- [Caratteristiche Principali](#caratteristiche-principali)
-- [Benefici](#benefici)
-- [Casi d'Uso](#casi-duso)
-- [Iniziare](#iniziare)
-- [Descrizione Workingflow](#descrizione-del-workingflow)
+## Contents
+- [Main Features](#main-features)
+- [Benefits](#benefits)
+- [Use Cases](#use-cases)
+- [Dependencies](#dependencies)
+- [Getting Started](#getting-started)
+- [Workflow Description](#workflow-description)
 - [Testing](#testing)
 
 ---
 
-### Caratteristiche Principali
+## Main Features
 
-- **Indipendenza dalla Topologia della rete**:
-    - La topologia non è hardcodata nella rete
-    - Il sistema prende la topologia in input e crea la rete da essa
+- **Network Topology Independence**:
+    - The topology is not embedded in the code.
+    - The system takes the network topology as input from an external file.
+    - A network graph is created and analyzed using networkx.
 
+- **Total Deployment Autonomy**:
+    - Enables launching the service without specifying hosts.
+    - The system detects hosts with the fewest services and automatically deploys on them.
+    - A communication channel between two hosts is automatically created.
+    - Fully automated deployment.
 
-- **Totale Autonomia di Deploy**:
-    - Implementa la possibilità di lanciare il servizio senza specificare gli host
-    - Il sistema rileverà gli host ocn meno sevizi e ci caricherà il nuovo
-    - Verrà inoltre creato un canale di comunicazio tra i due host
-    - Deploy automatico specificando solo il servizio
+## Benefits
 
+- **Flexibility**: If there is a change in the network, no changes to the system architecture are required—simply specify a new input file with the updated topology.
+- **Autonomy**: Allows users to deploy automatically via the GUI while maintaining balanced network hosts.
 
-### Benefici
+## Use Cases
 
-- **Flessibilità**: Riduce la necessità di intervenire nel sistema se è richiesto un cambio nella topologia della rete
-- **Autonomia**: Permette all'utente un deploy automatico tramite GUI garantendo la rete bilanciata senza che debba alzare un dito
+- **Corporate Networks**: Ensures business continuity with minimal changes in case of network modifications.
+- **Non-Technical Staff**: Enables service deployment by staff with limited technical knowledge.
 
-### Casi d'Uso
+## Dependencies
 
-- **Reti Aziendali**: Garantisce la continuità aziendale date le modifiche minie da apportare in caso di un cambiamento alla rete
-- **Personale con poca esperienza**: Permette di effettuare deploy da parte di personale senza conoscenza tecnica
+The system runs on a Comnetsemu virtual machine.  
+Uses Mininet to create a virtual network.  
 
+Additionally, the following Python libraries are used:
 
+ - NetworkX: a Python library for studying graphs and networks.
 
-## Iniziare
+## Getting Started
 
-Comandi di Inizializzazione
-Per avviare la rete e il controller, basta eseguire le seguenti istruzioni per avviare il controller:
+Ensure that you are using and have installed all necessary dependencies on your machine.  
+
+Initialization Commands  
+To start the network, controller, and GUI, execute the following commands:  
 
 ```bash
 ryu-manager FlowController.py
 ```
+*Start the controller*
 
 <details>
 <summary>output</summary>
     <p align="center">
-      <img src="images/test.png" width="600">
+      <img src="images/flowC.png" width="600">
     </p>
 </details>
 
-e su un altro terminale chiamare il comando per aprire la gui
+In a different terminal, start the GUI script with the command:
 
 ```bash
 sudo python3 GUImain.py
 ```
+*Start the GUI*
+
+<p align="center">
+    <img src="images/gui.jpg" width="600">
+</p>
+
+## Workflow Description
+
+#### Deploying a Service
+1. Enter the desired service name.
+2. Click the Deploy button – the following functions will be called sequentially.
+3. Deploy a server
+    ```python
+    def deploy_service(self, net, service_name, port, host_server = None, host_name=None):
+        # Code snippet continues as in the original file
+    ```
+
+4. Deploy the client using the same function by specifying `service_name`. Note that it includes the `create_flow` function (shown below), which establishes a communication channel between the two hosts.
+    ```python
+    def create_flow(self, net, h1, h2):
+    # Code snippet continues as in the original file
+    ```
+
+#### Stopping a Service
+1. Select the service to stop from the drop-down menu.
+2. Click the Delete button – the following functions will be called sequentially.
+4. Stop client
+  ```python
+    def stop_service(self, net, service_name, port, host_name=None):
+        # Code snippet continues as in the original file
+  ```
+
+5. Stop server using the same functions, specifying `service_name`.
+6. Remove the communication channel.
+     ```python
+       def delete_flow(self, het, h1, h2):
+       # Code snippet continues as in the original file
+      ```
+
+All operations will be displayed to the user through a convenient screen in the graphical interface.
+
 <details>
 <summary>output</summary>
     <p align="center">
       <img src="images/test.png" width="600">
     </p>
 </details>
-
-
-## Descrizione del workingflow
-
-<p align="center">
-  <img src="images/test.png" width="1000">
-</p>
-
-#### Deploy
-1. Inserire il nome del servizio voluto
-2. premere start - verrànno chiamate a cascata le funzioni
-3. start client
-    ```python
-    def sottrazione(a, b):
-        """Restituisce la differenza tra due numeri."""
-        return a - b
-    ```
-
-4. deploy client che contiene initflow
-    ```python
-    def sottrazione(a, b):
-        """Restituisce la differenza tra due numeri."""
-        return a - b
-    ```
-
-
-#### Stop
-1. selezionare dal menu a tendina il servizio da fermare
-2. premere stop
-3. verranno chiamate le funzioni
-4. stop client
-  ```python
-  def somma(a, b):
-      """Restituisce la somma di due numeri."""
-      return a + b
-  ```
-
-5. stop server
-    ```python
-    def sottrazione(a, b):
-        """Restituisce la differenza tra due numeri."""
-        return a - b
-    ```
-
-
-le operazioni verranno mostrate all'utente tramite un comodo schermo
-
-
-
 
 ## Testing
 
-è possibile controllare tramita wireshark l'effettoivo scambio di messaggi tra client e server
+You can use Wireshark to monitor the actual message exchange between client and server.
+
 <details>
-<summary>output</summary>
     <p align="center">
-      <img src="images/test.png" width="600">
+      <img src="images/wirshark.jpg" width="600">
     </p>
 </details>
 
-[Video demo](https://www.youtube.com/watch?v=0IURpXwvLrw)
-
+Example of correct operation
 
 <details>
-<summary>output di esempio per verificare il corretto funzionamento</summary>
 
 ---
 
-- [all good](images/test.png)
-- [broken s1](images/test.png)
+![Deploy](images/test.png)  
+*Message confirming service deployment*  
+
+![Delete](images/test.png)  
+*Message confirming service termination*
 
 </details>
+
+
+[Video demo](https://www.youtube.com/watch?v=0IURpXwvLrw)
+
