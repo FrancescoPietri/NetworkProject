@@ -311,4 +311,4 @@ esempio di corretto funzionamento
 </details>
 
 
-<br>[Video demo](https://www.youtube.com/watch?v=0IURpXwvLrw)
+
