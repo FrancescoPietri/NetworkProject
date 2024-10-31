@@ -141,10 +141,10 @@ Example of correct operation
 
 ---
 
-![Deploy](images/test.png)  
+![Deploy](images/Deploy.png)
 *Message confirming service deployment*  
 
-![Delete](images/test.png)  
+![Delete](images/Delete.png)
 *Message confirming service termination*
 
 </details>

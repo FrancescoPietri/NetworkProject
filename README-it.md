@@ -303,9 +303,9 @@ esempio di corretto funzionamento
 
 ---
 
- ![Deploy](images/test.png
+ ![Deploy](images/Deploy.png
 )  <br> *messaggio di avvenuto Deploy del servizio* <br>
- ![Delete](images/test.png
+ ![Delete](images/Delete.png
 ) <br> *messaggio di avvenuto Arresto del servizio*
 
 </details>
