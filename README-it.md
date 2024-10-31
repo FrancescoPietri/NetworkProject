@@ -2,9 +2,9 @@ English version [here](README.md)
 
 ---
 
-# Network Project
+# SDN Service Deployer
 
-> Il progetto N è pensato per creare una rete virtuale altamente flessibile e adattabile ai cambiamenti, rendendo il sistema versatile e capace di gestire automaticamente il deployment, l’arresto dei servizi e la creazione del canale per lo scambio di messaggi tra di essi. L’architettura assicura un bilanciamento ottimale degli host, massimizzando l’utilizzo delle risorse di rete. Inoltre, il sistema include una GUI intuitiva per una gestione semplice ed immediata.
+> Il progetto SDN Service Deployer è pensato per creare una rete virtuale altamente flessibile e adattabile ai cambiamenti, rendendo il sistema versatile e capace di gestire automaticamente il deployment, l’arresto dei servizi e la creazione del canale per lo scambio di messaggi tra di essi. L’architettura assicura un bilanciamento ottimale degli host, massimizzando l’utilizzo delle risorse di rete. Inoltre, il sistema include una GUI intuitiva per una gestione semplice ed immediata.
 
 
 ## Contenuti
@@ -35,8 +35,8 @@ English version [here](README.md)
 
 ### Benefici
 
-- **Flessibilità**: Riduce la necessità di intervenire nel sistema se è richiesto un cambio nella topologia della rete, specificando semplicemente un diverso file contenete un'altra topologia
-- **Autonomia**: Permette all'utente un deploy automatico tramite GUI garantendo allo stesso tempo il mantenimento della rete bilanciata
+- **Flessibilità**: Al verificarsi si un cambio della rete non è necessario un intervento nell'architettura del sistema, è sufficiente specificare un diverso file in imput contenente la nuova topologia
+- **Autonomia**: Permette all'utente un deploy automatico tramite GUI garantendo allo stesso tempo il mantenimento degli host della rete bilanciati
 
 ### Casi d'Uso
 
@@ -48,8 +48,8 @@ English version [here](README.md)
 ## Dipendenze
 
 Il sistema lavora su macchina virtuale Comnetsemu<br>
-Utilizza Mininet per la creazione di una rete virtuale<br>
-In aggiunta sono state sfruttate le seguenti liberie python
+Utilizza Mininet per la creazione di una rete virtuale<br> <br>
+Sono state sfruttate inoltre le seguenti liberie python
 
  - NetworkX : libreria Python per lo studio di grafi e reti 
    
@@ -71,33 +71,31 @@ ryu-manager FlowController.py
 <details>
 <summary>output</summary>
     <p align="center">
-      <img src="![Screenshot_20241031_154814](https://github.com/user-attachments/assets/05f061f0-f617-4300-abec-0dc8790dfefd)
+      <img src="images/flowC.png"
  width="600">
     </p>
 </details>
 
-e su un altro terminale avviare lo script della GUI tramite il comando:
+<br>
+E su un altro terminale avviare lo script della GUI tramite il comando:
+<br>
 
 ```bash
 sudo python3 GUImain.py
 ```
 *Avvio della GUI*
 
-<details>
-<summary>output</summary>
-    <p align="center">
-      <img src="![image](https://github.com/user-attachments/assets/06fc844a-de67-4d86-ac54-10a637e10f2a)
-" width="600">
-    </p>
-</details>
+<p align="center">
+    <img src="images/gui.jpg" width="600">
+</p>
 
 
 ## Descrizione del workingflow
 
-#### Deploy
+#### Deploy di un servizio
 1. Inserire il nome del servizio voluto
 2. premere il pulsante Deploy - verrànno chiamate a cascata le seguenti funzioni
-3. deploy di un server
+3. Deploy di un server
     ```python
     def deploy_service(self, net, service_name, port, host_server = None, host_name=None):
         if not self.service_count:
@@ -151,7 +149,7 @@ sudo python3 GUImain.py
             print(f"Error during deployment of {service_name} on {host_name}: {e}")
     ```
 
-4. deploy del client con la medesima funzione specificando service_name, notare che contiene la funzione create_flow (riportata sotto) la quale crea il canale di comunicazione tra i due host
+4. Deploy del client con la medesima funzione specificando service_name, notare che contiene la funzione create_flow (riportata sotto) la quale crea il canale di comunicazione tra i due host
     ```python
         def create_flow(self, net, h1, h2):
         nxTopo = nx.Graph()
@@ -227,10 +225,10 @@ sudo python3 GUImain.py
     ```
 
 
-#### Stop
+#### Arresto di un servizio
 1. selezionare dal menu a tendina il servizio che si vuole arrestare
-2. premere il pulsante Delete - verranno chiamate a cascata le funzioni
-4. stop client
+2. premere il pulsante Delete - verranno chiamate a cascata le seguanti funzioni
+4. Stop client
   ```python
     def stop_service(self, net, service_name, port, host_name=None):
         try:
@@ -256,16 +254,33 @@ sudo python3 GUImain.py
                 print(f"Service at port: {port} stopped successfully on {host_name}")
   ```
 
-5. stop server, anche in questo caso sono state usate le stesse funzioni, specificando service_name
+5. Stop server, anche in questo caso sono state usate le stesse funzioni, specificando service_name
+6. Rimozione del canale di comunicazione
+     ```python
+       def delete_flow(self, het, h1, h2):
 
+        flow_write = []
 
-le operazioni verranno mostrate all'utente tramite un comodo schermo
+        with open('flow.json', 'r') as json_file:
+            flow_entries = json.load(json_file)
+
+        for flow in flow_entries:
+            if (flow["src"]==f"10.0.0.{h1.split('h')[1]}" or flow["src"]==f"10.0.0.{h2.split('h')[1]}") and (flow["dst"]==f"10.0.0.{h1.split('h')[1]}" or flow["dst"]==f"10.0.0.{h2.split('h')[1]}"):
+                print(f"removed {h1}->{h2}")
+            else:
+                flow_write.append(flow)
+
+        with open('flow.json', 'w') as json_file:
+            json.dump(flow_write, json_file, indent=4)
+      ```
+
+<br>
+Tutte le operazioni verranno mostrate all'utente tramite un comodo schermo presente nell'interfaccia grafica
 
 <details>
 <summary>output</summary>
     <p align="center">
-      <img src="![image](https://github.com/user-attachments/assets/06fc844a-de67-4d86-ac54-10a637e10f2a)
-" width="600">
+      <img src="images/test.png" width="600">
     </p>
 </details>
 
@@ -276,24 +291,24 @@ le operazioni verranno mostrate all'utente tramite un comodo schermo
 è possibile controllare tramite Wireshark l'effettivo scambio di messaggi tra client e server
 
 <details>
-<summary>output</summary>
     <p align="center">
-      <img src="![image](https://github.com/user-attachments/assets/0a1242dc-004c-4c3b-a872-2972ecf05cc7)
-" width="600">
+      <img src="images/wirshark.jpg" width="600">
     </p>
 </details>
 
-[Video demo](https://www.youtube.com/watch?v=0IURpXwvLrw)
-
+<br>
+esempio di corretto funzionamento
 
 <details>
-<summary>output di esempio per verificare il corretto funzionamento</summary>
 
 ---
 
- ![Deploy](![test](https://github.com/user-attachments/assets/a20743f0-d7d7-461f-96e0-70cf37a69b85)
-) *messaggio di avvenuto Deploy del servizio*
- ![Delete](![test](https://github.com/user-attachments/assets/980f6610-5772-4545-ab8a-bc627b969ea6)
-) *messaggio di avvenuto Arresto del servizio*
+ ![Deploy](images/test.png
+)  <br> *messaggio di avvenuto Deploy del servizio* <br>
+ ![Delete](images/test.png
+) <br> *messaggio di avvenuto Arresto del servizio*
 
 </details>
+
+
+<br>[Video demo](https://www.youtube.com/watch?v=0IURpXwvLrw)
