@@ -82,7 +82,13 @@ class CommandGUI:
 
         self.log_area.insert(tk.END, f"Removing flow for {service_name}>>\n")
 
-        fm.delete_flow(self.net, self.service_manager[f'{service_name}'][1], self.service_manager[f'{service_name}'][2])
+        flag_flow = True
+        for port in self.deployer.service_count[self.service_manager[f'{service_name}'][1]]["services"]:
+            if port in self.deployer.service_count[self.service_manager[f'{service_name}'][2]]["services"] and port != self.service_manager[f'{service_name}'][0]:
+                flag_flow = False
+
+        if flag_flow:    
+            fm.delete_flow(self.net, self.service_manager[f'{service_name}'][1], self.service_manager[f'{service_name}'][2])
 
         self.service_manager.pop(f"{service_name}")
 

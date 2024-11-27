@@ -12,7 +12,7 @@ import json
 
 class FlowManager():
     
-    def delete_flow(self, het, h1, h2):
+    def delete_flow(self, net, h1, h2):
 
         flow_write = []
 
@@ -27,6 +27,8 @@ class FlowManager():
 
         with open('flow.json', 'w') as json_file:
             json.dump(flow_write, json_file, indent=4)
+
+        net.hosts[0].cmd(f"ping -c 1 {net.hosts[1]}")
 
     def create_flow(self, net, h1, h2):
         nxTopo = nx.Graph()
