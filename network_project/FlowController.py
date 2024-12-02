@@ -1,3 +1,4 @@
+import threading
 from ryu.base import app_manager
 from ryu.controller import ofp_event
 from ryu.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER
@@ -13,6 +14,11 @@ class FlowController(app_manager.RyuApp):
         self.datapaths = {}
         self.load_flows()
         self.installed_flows = set()
+
+        threading.Timer(10.0, self.check_allowed_flows).start()
+
+    def check_allowed_flows(self):
+        self.install_flows("0000000000000001")
 
     def load_flows(self):
         with open('flow.json', 'r') as f:

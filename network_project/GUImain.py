@@ -4,8 +4,10 @@ from mininet.net import Mininet
 from mininet.node import OVSKernelSwitch, RemoteController
 from mininet.link import TCLink
 from topology import ShipTopo
+from topologyD import ShipTopoD
 from deployer import WebServiceDeployer 
 from connectivity import FlowManager 
+import sys
 import threading
 import json
 
@@ -156,8 +158,21 @@ def main():
 
     with open('flow.json', 'w') as json_file:
         json.dump(reset_flow, json_file, indent=4)
-    
-    topo = ShipTopo()
+
+    if len(sys.argv) < 2:
+        print("Usage: A: ShipTopo B: ShipTopoDestroyed")
+        print("Exiting...")
+        sys.exit()
+
+    a, topoE = sys.argv
+
+    print(topoE)
+
+    if(topoE == "B"):
+        topo = ShipTopoD()
+    else:
+        topo = ShipTopo()
+        
     net = Mininet(
         topo=topo,
         switch=OVSKernelSwitch,
