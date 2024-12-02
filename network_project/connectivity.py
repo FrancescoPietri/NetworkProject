@@ -47,6 +47,7 @@ class FlowManager():
 
         for step in range(len(path)-1):
             if step == 0:
+                #prendo dall'oggetto net le specifiche del link tra l'host e lo switch e trovo la porta dello switch a cui l'host è collegato
                 port_host_send = net.linksBetween(net.get(path[0]), net.get(path[1]))[0].intf1.name
 
                 if not port_host_send.split('-')[0] == path[1]:

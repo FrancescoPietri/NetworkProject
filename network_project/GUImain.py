@@ -83,7 +83,9 @@ class CommandGUI:
         fm=FlowManager()
 
         self.log_area.insert(tk.END, f"Removing flow for {service_name}>>\n")
-
+        
+        #scorre tutte le porte utilizzate su h1 e controlla su h2 se è utilizzata la stessa porta e non è la porta del servizio da rimuovere, in quel caso vuol
+        #dire che c'è un altro servizio che necessita connettività tra h1 e h2 e quindi non elimina il flow
         flag_flow = True
         for port in self.deployer.service_count[self.service_manager[f'{service_name}'][1]]["services"]:
             if port in self.deployer.service_count[self.service_manager[f'{service_name}'][2]]["services"] and port != self.service_manager[f'{service_name}'][0]:
