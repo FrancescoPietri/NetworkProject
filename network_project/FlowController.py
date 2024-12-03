@@ -14,11 +14,14 @@ class FlowController(app_manager.RyuApp):
         self.datapaths = {}
         self.load_flows()
         self.installed_flows = set()
-
-        threading.Timer(10.0, self.check_allowed_flows).start()
+    
+        threading.Timer(3.0, self.check_allowed_flows).start()
 
     def check_allowed_flows(self):
-        self.install_flows("0000000000000001")
+        print("checking flow")
+        self.install_flows(0x1)
+        threading.Timer(3.0, self.check_allowed_flows).start()
+
 
     def load_flows(self):
         with open('flow.json', 'r') as f:
